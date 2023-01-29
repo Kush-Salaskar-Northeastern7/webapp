@@ -4,4 +4,4 @@ This is my first commit
 Checking PR
 
 Testing branch protection
-dummy
+Branch rule
