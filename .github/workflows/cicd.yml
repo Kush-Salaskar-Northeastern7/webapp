@@ -1,0 +1,15 @@
+name: Test CiCd
+on: 
+  push:
+    branches: [main]
+jobs:
+  check-cicd:
+    name: Check cicd
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '18.11.0'
