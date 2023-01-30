@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/Kush-Salaskar-Northeastern7/webapp#readme",
   "dependencies": {
+    "basic-auth": "^2.0.1",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.1",
     "cookie-parser": "^1.4.6",

@@ -14,17 +14,17 @@ const User = db.define('users', {
     password: {
         type: Sequelize.STRING
     },
-    firstname: {
+    first_name: {
         type: Sequelize.STRING
     },
-    lastname: {
+    last_name: {
         type: Sequelize.STRING
     },
     account_created: {
         type: Sequelize.DATE
     },
     account_updated: {
-    type: Sequelize.DATE
+        type: Sequelize.DATE
     }
     }, {
     createdAt: 'account_created',
