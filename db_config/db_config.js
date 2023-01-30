@@ -4,6 +4,7 @@ const Sequelize = require('sequelize')
 const db = new Sequelize('postgres', 'postgres', 'password', {
     host:  '127.0.0.1' || 'localhost',
     dialect: 'postgres',
+    logging: false,
     operatorsAlias: false,
 
     pool: {
