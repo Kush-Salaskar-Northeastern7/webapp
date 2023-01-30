@@ -24,4 +24,18 @@ const getUserById = async (id) => {
     }
 }
 
-module.exports = { signUpUser, checkExistingUser, getUserById }
+const updateUserById = async (id, existingUser) => {
+
+    return await User.update({
+        account_updated: new Date(),
+        first_name: existingUser.first_name,
+        last_name: existingUser.last_name,
+        password: existingUser.password
+      }, {
+        where: {
+          id: id
+        }
+      })
+}
+
+module.exports = { signUpUser, checkExistingUser, getUserById, updateUserById }
