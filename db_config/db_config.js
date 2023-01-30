@@ -14,4 +14,4 @@ const db = new Sequelize('postgres', 'postgres', 'password', {
     },
 })
 
-module.exports = db;
+module.exports = db
