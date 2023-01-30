@@ -7,7 +7,7 @@ const api = supertest(app)
 describe('Test Database Connection', () => {
     test('Connection should be established successfully', async () => {
       try {
-        await db.authenticate();
+        await db.authenticate()
         console.log('Connection has been established successfully.')
       } catch (error) {
         console.error('Unable to connect to the database:', error)
