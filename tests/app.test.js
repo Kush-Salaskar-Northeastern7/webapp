@@ -28,6 +28,6 @@ describe('Checking server health', () => {
     test('HTTP Status code is 200, OK', async () => { 
         await api
         .get('/healthz')
-        .expect(400)
+        .expect(200)
     })
 })
