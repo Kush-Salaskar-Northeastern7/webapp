@@ -11,4 +11,17 @@ const checkExistingUser = async (username) => {
     return await User.findOne({ where: { username: username } })
 }
 
-module.exports = { signUpUser, checkExistingUser }
+const getUserById = async (id) => {
+    try {
+        const user = await User.findOne({
+            where: {
+              id: id
+            }
+          })
+        return user
+    } catch (error) {
+        return null
+    }
+}
+
+module.exports = { signUpUser, checkExistingUser, getUserById }

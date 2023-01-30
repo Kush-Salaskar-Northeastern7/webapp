@@ -1,5 +1,5 @@
 const { validationResult } = require('express-validator')
-const { signUpUser, checkExistingUser } = require('../utils/userUtils')
+const { signUpUser, checkExistingUser, getUserById } = require('../utils/userUtils')
 const bcrypt = require('bcryptjs')
 
 //Method to handle errors
@@ -42,4 +42,35 @@ const signUp = async (req, res) => {
     }
 }
 
-module.exports = { signUp }
+const getUser = async (req, res) => {
+    try {
+        const id = req.params.id
+        const userById = await getUserById(id)
+        if (userById == null) return errorHandler(`User by this id does not exists`, res, 404)
+
+        // the username and password from Basic Auth
+        const requsername = req.credentials.name
+        const reqpassword = req.credentials.pass
+
+        // pass header username(email) to check if user exists
+        const existingUser = await checkExistingUser(requsername.toLowerCase())
+        if (existingUser == null) return errorHandler(`Username is incorrect`, res, 401)
+
+        let isPasswordMatch = bcrypt.compareSync(
+            reqpassword,
+            existingUser.password
+        );
+ 
+        // if wrong password throw 401
+        if (!isPasswordMatch) return errorHandler(`Credentials do not match`, res, 401)
+
+        const userData = existingUser.toJSON()
+        let {password, ...newUserData} = {...userData}
+
+        setSuccessResponse(newUserData, res)
+    } catch (e) {
+        errorHandler(e.message, res)
+    }
+}
+
+module.exports = { signUp, getUser }

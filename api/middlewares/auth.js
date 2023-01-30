@@ -8,6 +8,7 @@ const authenticate = (req, res, next) => {
       res.setHeader('WWW-Authenticate', 'Basic realm="Access to the API"')
       res.end('Access denied')
     } else {
+      req.credentials = credentials
       next()
     }
   }

@@ -16,4 +16,10 @@ router.route('/')
         controller.signUp
    )
 
+router.route('/:id')
+    .get(
+        basicAuth,
+        controller.getUser
+    )
+
 module.exports = router
