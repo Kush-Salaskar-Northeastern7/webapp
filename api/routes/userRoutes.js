@@ -16,4 +16,17 @@ router.route('/')
         controller.signUp
    )
 
+router.route('/:id')
+    .get(
+        basicAuth,
+        controller.getUser
+    )
+    .put(
+        basicAuth,
+        body('first_name').trim().not().isEmpty().withMessage('First name is required'),
+        body('last_name').trim().not().isEmpty().withMessage('Last name is required'),
+        body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters long'),
+        controller.updateUser
+     )
+
 module.exports = router
