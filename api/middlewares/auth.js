@@ -6,7 +6,7 @@ const authenticate = (req, res, next) => {
     if (!credentials) {
       res.statusCode = 401
       res.setHeader('WWW-Authenticate', 'Basic realm="Access to the API"')
-      res.end('Access denied')
+      res.end()
     } else {
       req.credentials = credentials
       next()
