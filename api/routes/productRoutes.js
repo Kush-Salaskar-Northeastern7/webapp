@@ -10,6 +10,11 @@ const router = express.Router()
 router.route('/')
    .post(
         basicAuth,
+        body('name').trim().not().isEmpty().withMessage('Name is required'),
+        body('description').trim().not().isEmpty().withMessage('Description is required'),
+        body('sku').trim().not().isEmpty().withMessage('SKU is required'),
+        body('manufacturer').trim().not().isEmpty().withMessage('Manufacturer is required'),
+        body('quantity').trim().not().isEmpty().withMessage('Quantity is required'),
         controller.addProduct
    )
 
@@ -19,6 +24,11 @@ router.route('/:id')
     )
     .put(
         basicAuth,
+        body('name').trim().not().isEmpty().withMessage('Name is required'),
+        body('description').trim().not().isEmpty().withMessage('Description is required'),
+        body('sku').trim().not().isEmpty().withMessage('SKU is required'),
+        body('manufacturer').trim().not().isEmpty().withMessage('Manufacturer is required'),
+        body('quantity').trim().not().isEmpty().withMessage('Quantity is required'),
         controller.updateProduct 
      )
      .delete(
