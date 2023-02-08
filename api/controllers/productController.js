@@ -33,6 +33,12 @@ const addProduct = async (req, res) => {
         // if wrong password throw 401
         if (!isPasswordMatch) return errorHandler(`Credentials do not match`, res, 401)
 
+        // if any validation fails
+        const validationErrors = validationResult(req);
+        if (!validationErrors.isEmpty()) {
+            return errorHandler(validationErrors.array(), res, 400)
+        }
+
         const product = {...req.body, owner_user_id: existingUser.id }
         const newProduct = await addNewProduct(product)
 
