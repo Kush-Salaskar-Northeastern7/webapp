@@ -31,6 +31,10 @@ router.route('/:id')
         body('quantity').trim().not().isEmpty().withMessage('Quantity is required'),
         controller.updateProduct 
      )
+     .patch(
+         basicAuth,
+         controller.updateProductPatch
+     )
      .delete(
         basicAuth,
         controller.deleteProduct
