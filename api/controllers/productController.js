@@ -1,6 +1,6 @@
 const { validationResult } = require('express-validator')
 const { checkExistingUser, getUserById } = require('../utils/userUtils')
-const { addNewProduct, getProductById, deleteProductFromDB, updateProductById } = require('../utils/productUtils')
+const { addNewProduct, getProductById, deleteProductFromDB, checkExistingSku, updateProductById } = require('../utils/productUtils')
 const bcrypt = require('bcryptjs')
 
 //Method to handle errors
@@ -38,6 +38,10 @@ const addProduct = async (req, res) => {
         if (!validationErrors.isEmpty()) {
             return errorHandler(validationErrors.array(), res, 400)
         }
+
+        const existingSku = await checkExistingSku(req.body.sku)
+        if (typeof existingSku === 'object' && existingSku !== null) 
+            return errorHandler(`Sku already exists`, res, 400)
 
         const product = {...req.body, owner_user_id: existingUser.id }
         const newProduct = await addNewProduct(product)
@@ -91,6 +95,10 @@ const updateProduct = async (req, res) => {
             return errorHandler(validationErrors.array(), res, 400)
         }
 
+        const existingSku = await checkExistingSku(req.body.sku)
+        if (typeof existingSku === 'object' && existingSku !== null) 
+            return errorHandler(`Sku already exists`, res, 400)
+
         const newProduct = req.body
         
         // call the modifyUser service
@@ -124,6 +132,10 @@ const updateProductPatch = async (req, res) => {
         if (productById == null) return errorHandler(`Product by this id does not exists`, res, 404)
 
         if (productById.owner_user_id !== existingUser.id) return errorHandler("You are not allowed to modify this resource", res, 403)
+
+        const existingSku = await checkExistingSku(req.body.sku)
+        if (typeof existingSku === 'object' && existingSku !== null) 
+            return errorHandler(`Sku already exists`, res, 400)
 
         // in a PATCH request, we only update the fields that are provided in the request body
         const updates = req.body
