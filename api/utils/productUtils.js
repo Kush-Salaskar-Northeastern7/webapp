@@ -19,6 +19,10 @@ const getProductById = async (id) => {
     }
 }
 
+const checkExistingSku = async (sku) => {
+  return await Product.findOne({ where: { sku: sku } })
+}
+
 const updateProductById = async (id, currProduct) => {
 
     return await Product.update({
@@ -44,4 +48,4 @@ const deleteProductFromDB = async (product) => {
     }
 }
 
-module.exports = { addNewProduct, getProductById, updateProductById, deleteProductFromDB }
+module.exports = { addNewProduct, getProductById, updateProductById, checkExistingSku, deleteProductFromDB }

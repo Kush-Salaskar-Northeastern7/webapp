@@ -14,7 +14,7 @@ router.route('/')
         body('description').trim().not().isEmpty().withMessage('Description is required'),
         body('sku').trim().not().isEmpty().withMessage('SKU is required'),
         body('manufacturer').trim().not().isEmpty().withMessage('Manufacturer is required'),
-        body('quantity').trim().not().isEmpty().withMessage('Quantity is required'),
+        body('quantity').trim().not().isEmpty().withMessage('Quantity is required').isInt().withMessage('Quantity must be an integer'),
         controller.addProduct
    )
 

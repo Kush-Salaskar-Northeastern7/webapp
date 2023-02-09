@@ -17,7 +17,8 @@ const Product = db.define('products', {
     },
     sku: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
+        unique: true
     },
     manufacturer: {
         type: Sequelize.STRING,
