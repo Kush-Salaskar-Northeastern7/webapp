@@ -133,9 +133,12 @@ const updateProductPatch = async (req, res) => {
 
         if (productById.owner_user_id !== existingUser.id) return errorHandler("You are not allowed to modify this resource", res, 403)
 
-        const existingSku = await checkExistingSku(req.body.sku)
-        if (typeof existingSku === 'object' && existingSku !== null) 
-            return errorHandler(`Sku already exists`, res, 400)
+        if (req.body.sku !== undefined) {
+            const existingSku = await checkExistingSku(req.body.sku)
+            if (typeof existingSku === 'object' && existingSku !== null) 
+                return errorHandler(`Sku already exists`, res, 400)
+        }
+        
 
         // in a PATCH request, we only update the fields that are provided in the request body
         const updates = req.body
