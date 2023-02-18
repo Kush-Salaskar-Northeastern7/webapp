@@ -8,7 +8,7 @@ packer {
 }
 
 // define variables
-varable "source_ami" {
+variable "source_ami" {
   type    = string
   default = ""
 }
