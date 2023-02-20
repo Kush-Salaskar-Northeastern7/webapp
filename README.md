@@ -27,3 +27,7 @@
 1. The CI script can be found in the file ```.github/workflows/ci.yml``` 
 2. A workflow will be triggered if the code is pushed to a forked remote branch. Check the running workflow using the ```Actions``` tab
 3. A pull request to the Upstream branch will start a workflow
+
+# Added Packer build
+
+1. You can create an AMI manually using the ```packer build``` command.

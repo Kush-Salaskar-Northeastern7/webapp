@@ -1,1 +1,0 @@
-source_ami = "ami-0dfcb1ef8550277af"
