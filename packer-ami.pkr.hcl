@@ -48,7 +48,7 @@ source "amazon-ebs" "my-ami" {
   ssh_username  = "${var.ssh_username}"
   ami_name      = "${var.ami_name}"
   ami_description = "AMI - Spring 2022"
-
+  ami_users = [562694632201]
 //   aws_polling {
 //     delay_seconds = 120
 //     max_attempts  = 50
