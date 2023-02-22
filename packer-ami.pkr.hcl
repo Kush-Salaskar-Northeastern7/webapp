@@ -30,12 +30,12 @@ variable "ssh_username" {
 
 variable "AWS_ACCESS_KEY_ID" {
   type    = string
-  default = "AKIA3AHZKQIDXGGMIUEA"
+  default = ""
 }
 
 variable "AWS_SECRET_ACCESS_KEY" {
   type    = string
-  default = "MVVOncvN8rA7MDlXRd3e29h9ZQm3b/L6IJBvFiNu"
+  default = ""
 }
 
 // source - amazon-ebs, shared with demo account
@@ -47,7 +47,7 @@ source "amazon-ebs" "my-ami" {
   source_ami    = "${var.source_ami}"
   ssh_username  = "${var.ssh_username}"
   ami_name      = "${var.ami_name}"
-  ami_description = "AMI - Spring 2022"
+  ami_description = "AMI - Spring 2023"
   ami_users = [562694632201]
 //   aws_polling {
 //     delay_seconds = 120
