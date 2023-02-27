@@ -2,6 +2,13 @@ const { validationResult } = require('express-validator')
 const { checkExistingUser, getUserById } = require('../utils/userUtils')
 const { addNewProduct, getProductById, deleteProductFromDB, checkExistingSku, updateProductById } = require('../utils/productUtils')
 const bcrypt = require('bcryptjs')
+const awssdk = require("aws-sdk")
+const multer = require("multer")
+const multerS3 = require("multer-s3")
+const dotenv = require('dotenv')
+
+dotenv.config()
+const s3 = new awssdk.S3({apiVersion: "2006-03-01"})
 
 //Method to handle errors
 const errorHandler = (message, res, errCode=500) => {
@@ -195,9 +202,80 @@ const getAllImagesForProduct = async (req, res) => {
 
 const addImage = async (req, res) => {
     try {
-        
+        // the username and password from Basic Auth
+        const requsername = req.credentials.name
+        const reqpassword = req.credentials.pass
+
+        // pass header username(email) to check if user exists
+        const existingUser = await checkExistingUser(requsername.toLowerCase())
+        if (existingUser == null) return errorHandler(`Username is incorrect`, res, 401)
+
+        let isPasswordMatch = bcrypt.compareSync(
+            reqpassword,
+            existingUser.password
+        );
+ 
+        // if wrong password throw 401
+        if (!isPasswordMatch) return errorHandler(`Credentials do not match`, res, 401)
+
+        const id = req.params.id
+        const productById = await getProductById(id)
+        if (productById == null) return errorHandler(`Product by this id does not exists`, res, 404)
+
+        if (productById.owner_user_id !== existingUser.id) return errorHandler("You are not allowed to delete this resource", res, 403)
+
+        const fileTypes = [
+            'image/png',
+            'image/jpeg',
+            'image/jpg'
+        ]
+
+        const upload = multer({
+            storage: multerS3({
+              s3: s3,
+              bucket: process.env.AWS_BUCKET_NAME,
+              acl: 'private',
+              metadata: function (req, file, cb) {
+                cb(null, { product_id: req.params.product_id })
+              },
+              key: function (req, file, cb) {
+                path = `${process.env.AWS_BUCKET_NAME}/${existingUser.id}/${Date.now().toString()}-${file.originalname}`
+                cb(null, path)
+              },
+            }),
+            fileFilter: (req, file, cb) => {
+                if (!fileTypes.includes(file.mimetype))
+                    return cb(new Error('File type is not valid'))
+                cb(null, true)
+            }
+          })
+          .single('imagefile')
+
+        await upload(req, res, async err => {
+            if (err) return errorHandler(`Only JPEG, JPG and PNG format accepted`, res, 400)
+    
+            if (req.file) {
+                const imgData = {
+                    file_name: req.file.originalname,
+                    product_id: id,
+                    s3_bucket_path: req.file.location
+                }
+                let productImg
+                let productImageData = await saveProductImg(imgData)
+                    .then(function(data) {
+                        productImg = data.toJSON()
+                        setSuccessResponse(productImg, res, 201)
+                    })
+                    .catch(error => {
+                        return errorHandler(error.message, res, 400)
+                    });
+            } else {
+                return errorHandler(`File is not selected`, res, 400)
+            }
+        })
+
     } catch (error) {
-        
+        errorHandler(error.message, res)
     }
 }
 

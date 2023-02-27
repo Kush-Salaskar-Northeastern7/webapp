@@ -53,7 +53,7 @@ router.route(':id/image')
 router.route('/:product_id/image/:image_id')
     .get(
         basicAuth,
-        contoller.getImageByProductId
+        controller.getImageByProductId
     )
     .delete(
         basicAuth,
