@@ -185,4 +185,36 @@ const deleteProduct = async (req, res) => {
     }
 }
 
-module.exports = { addProduct, getProduct, updateProduct, updateProductPatch, deleteProduct }
+const getAllImagesForProduct = async (req, res) => {
+    try {
+        
+    } catch (error) {
+        
+    }
+}
+
+const addImage = async (req, res) => {
+    try {
+        
+    } catch (error) {
+        
+    }
+}
+
+const getImageByProductId = async (req, res) => {
+    try {
+        
+    } catch (error) {
+        
+    }
+}
+
+const deleteImageByProductId = async (req, res) => {
+    try {
+        
+    } catch (error) {
+        
+    }
+}
+
+module.exports = { addProduct, getProduct, updateProduct, updateProductPatch, deleteProduct, getAllImagesForProduct, addImage, getImageByProductId, deleteImageByProductId }
