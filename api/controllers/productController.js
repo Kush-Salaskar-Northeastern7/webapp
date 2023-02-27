@@ -189,7 +189,7 @@ const getAllImagesForProduct = async (req, res) => {
     try {
         
     } catch (error) {
-        
+       errorHandler(error.message, res) 
     }
 }
 
