@@ -10,6 +10,9 @@ sudo yum -y update
 # gpgcheck=0
 # EOF
 
+sudo amazon-linux-extras install postgresql10
+sudo chmod 755 /home/ec2-user
+
 # sudo yum install postgresql13 postgresql13-server -y
 # sudo /usr/pgsql-13/bin/postgresql-13-setup initdb
 # sudo systemctl enable --now postgresql-13
