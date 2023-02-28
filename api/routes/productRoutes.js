@@ -40,13 +40,14 @@ router.route('/:id')
         controller.deleteProduct
      )
 
-router.route(':id/image')
+router.route('/:id/image')
     .get(
         basicAuth,
         controller.getAllImagesForProduct
     )
     .post(
         basicAuth,
+        controller.upload.array('file'), 
         controller.addImage
     )
 

@@ -1,14 +1,20 @@
 const { validationResult } = require('express-validator')
 const { checkExistingUser, getUserById } = require('../utils/userUtils')
-const { addNewProduct, getProductById, deleteProductFromDB, checkExistingSku, updateProductById } = require('../utils/productUtils')
+const { addNewProduct, getProductById, deleteProductFromDB, checkExistingSku, updateProductById, saveProductImg, getImagesByProductId, getImageById, deleteImageById } = require('../utils/productUtils')
 const bcrypt = require('bcryptjs')
-const awssdk = require("aws-sdk")
 const multer = require("multer")
 const multerS3 = require("multer-s3")
+const formidable = require('formidable')
+const fs = require('fs')
 const dotenv = require('dotenv')
+const AWS = require('aws-sdk')
 
 dotenv.config()
-const s3 = new awssdk.S3({apiVersion: "2006-03-01"})
+
+const s3 = new AWS.S3({
+    apiVersion: "2006-03-01"
+})
+
 
 //Method to handle errors
 const errorHandler = (message, res, errCode=500) => {
@@ -214,15 +220,21 @@ const getAllImagesForProduct = async (req, res) => {
                const productById = await getProductById(id)
                if (productById == null) return errorHandler(`Product by this id does not exists`, res, 404)
        
-               if (productById.owner_user_id !== existingUser.id) return errorHandler("You are not allowed to delete this resource", res, 403)
-        
+               if (productById.owner_user_id !== existingUser.id) return errorHandler("You are not allowed to view this resource", res, 403)
+       
+               const op = await getImagesByProductId(id)
+               if (op.length === 0) return setSuccessResponse("No images available", res, 404)
+
+               setSuccessResponse(op, res, 200)
+
     } catch (error) {
-       errorHandler(error.message, res) 
+       errorHandler(error.message, res, 400) 
     }
 }
 
 const addImage = async (req, res) => {
     try {
+        
         // the username and password from Basic Auth
         const requsername = req.credentials.name
         const reqpassword = req.credentials.pass
@@ -243,77 +255,124 @@ const addImage = async (req, res) => {
         const productById = await getProductById(id)
         if (productById == null) return errorHandler(`Product by this id does not exists`, res, 404)
 
-        if (productById.owner_user_id !== existingUser.id) return errorHandler("You are not allowed to delete this resource", res, 403)
+        if (productById.owner_user_id !== existingUser.id) return errorHandler("You are not allowed to add this resource", res, 403)
 
-        const fileTypes = [
-            'image/png',
-            'image/jpeg',
-            'image/jpg'
-        ]
+        const files = req.files
+        if (!files) return errorHandler(`File is not selected`, res, 400)
 
-        const upload = multer({
-            storage: multerS3({
-              s3: s3,
-              bucket: process.env.AWS_BUCKET_NAME,
-              acl: 'private',
-              metadata: function (req, file, cb) {
-                cb(null, { product_id: req.params.product_id })
-              },
-              key: function (req, file, cb) {
-                path = `${process.env.AWS_BUCKET_NAME}/${existingUser.id}/${Date.now().toString()}-${file.originalname}`
-                cb(null, path)
-              },
-            }),
-            fileFilter: (req, file, cb) => {
-                if (!fileTypes.includes(file.mimetype))
-                    return cb(new Error('File type is not valid'))
-                cb(null, true)
+        const params = req.files.map((file) => {
+            return {
+              Bucket: process.env.AWS_BUCKET_NAME,
+              Key: `${id}/${Date.now().toString()}-${file.originalname}`,
+              Body: file.buffer,
             }
           })
-          .single('imagefile')
 
-        await upload(req, res, async err => {
-            if (err) return errorHandler(`Only JPEG, JPG and PNG format accepted`, res, 400)
-    
-            if (req.file) {
-                const imgData = {
-                    file_name: req.file.originalname,
-                    product_id: id,
-                    s3_bucket_path: req.file.location
-                }
-                let productImg
-                let productImageData = await saveProductImg(imgData)
-                    .then(function(data) {
-                        productImg = data.toJSON()
-                        setSuccessResponse(productImg, res, 201)
-                    })
-                    .catch(error => {
-                        return errorHandler(error.message, res, 400)
-                    });
-            } else {
-                return errorHandler(`File is not selected`, res, 400)
-            }
-        })
+          
+          const uploaded = await Promise.all(params.map((param) => s3.upload(param).promise()))
+          
+          const imgData = {
+                      file_name: files[0].originalname,
+                      product_id: id,
+                      s3_bucket_path: uploaded[0].Location
+                    }
+          const productImageData = await saveProductImg(imgData)
+          const productImg = productImageData.toJSON()
+          setSuccessResponse(productImg, res, 201)
 
     } catch (error) {
-        errorHandler(error.message, res)
+        errorHandler(error.message, res, 400)
     }
 }
 
+const storage = multer.memoryStorage();
+
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype.split("/")[0] === "image") {
+    cb(null, true);
+  } else {
+    cb(new multer.MulterError("LIMIT_UNEXPECTED_FILE"), false);
+  }
+}
+
+const upload = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: 1000000000, files: 2 },
+});
+
+
 const getImageByProductId = async (req, res) => {
     try {
+        const requsername = req.credentials.name
+        const reqpassword = req.credentials.pass
         
+        // pass header username(email) to check if user exists
+        const existingUser = await checkExistingUser(requsername.toLowerCase())
+        if (existingUser == null) return errorHandler(`Username is incorrect`, res, 401)
+        
+        let isPasswordMatch = bcrypt.compareSync(
+            reqpassword,
+            existingUser.password
+        );
+            
+        // if wrong password throw 401
+        if (!isPasswordMatch) return errorHandler(`Credentials do not match`, res, 401)
+            
+        const id = req.params.product_id
+        const productById = await getProductById(id)
+        if (productById == null) return errorHandler(`Product by this id does not exists`, res, 404)
+            
+        if (productById.owner_user_id !== existingUser.id) return errorHandler("You are not allowed to view this resource", res, 403)
+            
+
+        const op = await getImageById(req.params.image_id, id)
+        if (!op) return setSuccessResponse("Image does not exist", res, 404)
+
+        setSuccessResponse(op, res, 200) 
     } catch (error) {
-        
+        errorHandler(error.message, res, 400)
     }
 }
 
 const deleteImageByProductId = async (req, res) => {
     try {
+       // the username and password from Basic Auth
+       const requsername = req.credentials.name
+       const reqpassword = req.credentials.pass
+
+       // pass header username(email) to check if user exists
+       const existingUser = await checkExistingUser(requsername.toLowerCase())
+       if (existingUser == null) return errorHandler(`Username is incorrect`, res, 401)
+
+       let isPasswordMatch = bcrypt.compareSync(
+           reqpassword,
+           existingUser.password
+       );
+
+       // if wrong password throw 401
+       if (!isPasswordMatch) return errorHandler(`Credentials do not match`, res, 401)
+
+       const id = req.params.product_id
+       const productById = await getProductById(id)
+       if (productById == null) return errorHandler(`Product by this id does not exists`, res, 404)
+
+       if (productById.owner_user_id !== existingUser.id) return errorHandler("You are not allowed to delete this resource", res, 403)
         
+       const image = await getImageById(req.params.image_id, id)
+       if (!image) return setSuccessResponse("Image does not exist", res, 404)
+
+        const key = image.s3_bucket_path.split("/").slice(-2).join("/")
+        await s3.deleteObject({ Bucket: process.env.AWS_BUCKET_NAME, Key: key }).promise();
+        const deleted = await deleteImageById(req.params.image_id, id)
+
+        if (!deleted) return errorHandler("Some issue deleting the image", res, 400)
+
+        setSuccessResponse("", res, 204)
+       
     } catch (error) {
-        
+       errorHandler(error.message, res, 400) 
     }
 }
 
-module.exports = { addProduct, getProduct, updateProduct, updateProductPatch, deleteProduct, getAllImagesForProduct, addImage, getImageByProductId, deleteImageByProductId }
+module.exports = { addProduct, getProduct, updateProduct, updateProductPatch, deleteProduct, getAllImagesForProduct, addImage, getImageByProductId, deleteImageByProductId, upload }

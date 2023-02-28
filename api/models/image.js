@@ -24,6 +24,7 @@ const Image = db.define('images', {
     },
     }, {
     createdAt: 'date_created',
+    updatedAt: false
 })
 
 module.exports = Image
