@@ -24,8 +24,8 @@ curl --silent --location https://rpm.nodesource.com/setup_16.x | sudo bash -
 sudo yum install -y nodejs
 sudo npm install pm2@latest -g
 cd ~/webapp
+sudo pm2 startup systemd --service-name webapp
 sudo pm2 start index.js
-sudo pm2 startup systemd
 sudo pm2 save
 
 echo "Hello, world"
