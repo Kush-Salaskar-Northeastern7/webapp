@@ -39,8 +39,8 @@ variable "AWS_SECRET_ACCESS_KEY" {
 }
 
 variable "DEMO_ID" {
-  type    = list(number)
-  default = [] 
+  type    = number
+  default = 562694632201 
 }
 
 // source - amazon-ebs, shared with demo account
@@ -53,7 +53,7 @@ source "amazon-ebs" "my-ami" {
   ssh_username  = "${var.ssh_username}"
   ami_name      = "${var.ami_name}"
   ami_description = "AMI - Spring 2023"
-  ami_users = var.DEMO_ID
+  ami_users = [var.DEMO_ID]
 
 //   aws_polling {
 //     delay_seconds = 120
