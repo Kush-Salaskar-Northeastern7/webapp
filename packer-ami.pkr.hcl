@@ -79,7 +79,7 @@ build {
   }
   provisioner "shell" {
     scripts = [
-      "./buildscript.sh",
+      "./buildscript.sh"
     ]
   }
 }
