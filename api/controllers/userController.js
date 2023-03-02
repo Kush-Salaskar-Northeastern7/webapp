@@ -64,7 +64,7 @@ const getUser = async (req, res) => {
         // if wrong password throw 401
         if (!isPasswordMatch) return errorHandler(`Credentials do not match`, res, 401)
 
-        if(existingUser.id !== id) return errorHandler(`You are not the proper user`, res, 403)
+        if(existingUser.id != id) return errorHandler(`You are not the proper user`, res, 403)
 
         const userData = userById.toJSON()
         let {password, ...newUserData} = {...userData}
