@@ -39,7 +39,7 @@ variable "AWS_SECRET_ACCESS_KEY" {
 }
 
 variable "DEMO_ID" {
-  type    = list(string)
+  type    = list(number)
   default = [] 
 }
 
