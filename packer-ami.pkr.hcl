@@ -38,6 +38,11 @@ variable "AWS_SECRET_ACCESS_KEY" {
   default = ""
 }
 
+variable "DEMO_ID" {
+  type    = string
+  default = "" 
+}
+
 // source - amazon-ebs, shared with demo account
 source "amazon-ebs" "my-ami" {
   access_key    = "${var.AWS_ACCESS_KEY_ID}"
