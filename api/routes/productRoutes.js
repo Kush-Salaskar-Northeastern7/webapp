@@ -40,4 +40,25 @@ router.route('/:id')
         controller.deleteProduct
      )
 
+router.route('/:id/image')
+    .get(
+        basicAuth,
+        controller.getAllImagesForProduct
+    )
+    .post(
+        basicAuth,
+        controller.upload.array('file'), 
+        controller.addImage
+    )
+
+router.route('/:product_id/image/:image_id')
+    .get(
+        basicAuth,
+        controller.getImageByProductId
+    )
+    .delete(
+        basicAuth,
+        controller.deleteImageByProductId
+    )
+
 module.exports = router

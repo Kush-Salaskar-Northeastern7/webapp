@@ -1,4 +1,5 @@
 const Product = require('../models/products')
+const Image = require('../models/image')
 
 
 //Creating a new Product
@@ -48,4 +49,44 @@ const deleteProductFromDB = async (product) => {
     }
 }
 
-module.exports = { addNewProduct, getProductById, updateProductById, checkExistingSku, deleteProductFromDB }
+const saveProductImg = async (imgData) => {
+  return await Image.create(imgData)
+}
+
+const getImagesByProductId = async (productId) => {
+  const images = await Image.findAll({
+    where: {
+      product_id: productId,
+    },
+  });
+  return images.map((image) => image.toJSON());
+};
+
+const getImageById = async (imageId, productId) => {
+  const image = await Image.findOne({
+    where: {
+      image_id: imageId,
+      product_id: productId,
+    },
+  });
+  if (!image) {
+    return false
+  }
+  return image.toJSON();
+};
+
+const deleteImageById = async (imageId, productId) => {
+  const image = await Image.findOne({
+    where: {
+      image_id: imageId,
+      product_id: productId,
+    },
+  });
+  if (!image) {
+    return false
+  }
+  await image.destroy();
+  return true
+};
+
+module.exports = { addNewProduct, getProductById, updateProductById, checkExistingSku, deleteProductFromDB, saveProductImg, getImagesByProductId, getImageById, deleteImageById }
