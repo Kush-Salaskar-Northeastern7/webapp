@@ -30,4 +30,4 @@
 
 # Added Packer build
 
-1. You can create an AMI manually using the ```packer build``` command.
+1. You can create an AMI manually using the ```packer build``` command
