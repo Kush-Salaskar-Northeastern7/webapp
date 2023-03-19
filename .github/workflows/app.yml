@@ -1,7 +1,7 @@
 name: Web App
 on: 
   push:
-    branches: [main]
+    branches: [cloudwatch]
 jobs:
   packer_validate:
     runs-on: ubuntu-latest

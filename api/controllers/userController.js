@@ -1,6 +1,9 @@
 const { validationResult } = require('express-validator')
 const { signUpUser, checkExistingUser, getUserById, updateUserById } = require('../utils/userUtils')
 const bcrypt = require('bcryptjs')
+const statsDClient = require('statsd-client')
+const sdc = new statsDClient({ host: 'localhost', port: 8125 })
+const logger = require('simple-node-logger').createSimpleLogger()
 
 //Method to handle errors
 const errorHandler = (message, res, errCode=500) => {
@@ -16,6 +19,7 @@ const setSuccessResponse = (data, res, successCode=200) => {
 
 const signUp = async (req, res) => {
     try {
+        sdc.increment('POST /v1/user')
         // express validator to check if errors
         const validationErrors = validationResult(req);
         if (!validationErrors.isEmpty()) {
@@ -36,14 +40,17 @@ const signUp = async (req, res) => {
         // convert to json and return response without password
         const userData = newUser.toJSON()
         let {password, ...newUserData} = {...userData}
+        logger.info(newUserData)
         setSuccessResponse(newUserData, res, 201)
     } catch (e) {
+        logger.error(e.message)
         errorHandler(e.message, res)
     }
 }
 
 const getUser = async (req, res) => {
     try {
+        sdc.increment('GET /v1/user/id')
         const id = req.params.id
         const userById = await getUserById(id)
         if (userById == null) return errorHandler(`User by this id does not exists`, res, 404)
@@ -69,15 +76,17 @@ const getUser = async (req, res) => {
         const userData = userById.toJSON()
         let {password, ...newUserData} = {...userData}
 
+        logger.info(newUserData)
         setSuccessResponse(newUserData, res)
     } catch (e) {
+        logger.error(e.message)
         errorHandler(e.message, res)
     }
 }
 
 const updateUser = async (req, res) => {
     try {
-
+        sdc.increment('PUT /v1/user/id')
         // if any validation fails
         const validationErrors = validationResult(req);
         if (!validationErrors.isEmpty()) {
@@ -120,6 +129,7 @@ const updateUser = async (req, res) => {
         setSuccessResponse('', res, 204)
         
     } catch (e) {
+        logger.error(e.message)
         errorHandler(e.message, res)
     }
 }
