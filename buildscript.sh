@@ -28,4 +28,7 @@ sudo pm2 startup systemd --service-name webapp
 sudo pm2 start index.js
 sudo pm2 save
 
+sudo yum install amazon-cloudwatch-agent -y
+sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/home/ec2-user/webapp/amazon-cloudwatch-config.json -s
+
 echo "Hello, world"
