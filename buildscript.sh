@@ -24,8 +24,12 @@ curl --silent --location https://rpm.nodesource.com/setup_16.x | sudo bash -
 sudo yum install -y nodejs
 sudo npm install pm2@latest -g
 cd ~/webapp
+sudo mkdir -p ~/logs
 sudo pm2 startup systemd --service-name webapp
-sudo pm2 start index.js
+sudo pm2 startOrReload ecosystem.config.js
 sudo pm2 save
+
+sudo yum install amazon-cloudwatch-agent -y
+sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/home/ec2-user/webapp/amazonCloudwatchConfig.json -s
 
 echo "Hello, world"

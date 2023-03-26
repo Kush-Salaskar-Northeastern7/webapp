@@ -8,6 +8,9 @@ const formidable = require('formidable')
 const fs = require('fs')
 const dotenv = require('dotenv')
 const AWS = require('aws-sdk')
+const statsDClient = require('statsd-client')
+const sdc = new statsDClient({ host: 'localhost', port: 8125 })
+const logger = require('simple-node-logger').createSimpleLogger()
 
 dotenv.config()
 
@@ -30,6 +33,7 @@ const setSuccessResponse = (data, res, successCode=200) => {
 
 const addProduct = async (req, res) => {
     try {
+        sdc.increment('POST /v1/product')
         // the username and password from Basic Auth
         const requsername = req.credentials.name
         const reqpassword = req.credentials.pass
@@ -59,28 +63,34 @@ const addProduct = async (req, res) => {
         const product = {...req.body, owner_user_id: existingUser.id }
         const newProduct = await addNewProduct(product)
 
+        logger.info(newProduct)
         setSuccessResponse(newProduct, res, 201)
     } catch (e) {
+        logger.error(e.message)
         errorHandler(e.message, res)
     }
 }
 
 const getProduct = async (req, res) => {
     try {
+        sdc.increment('GET /v1/product/pr_id')
         const id = req.params.id
         const productById = await getProductById(id)
         if (productById == null) return errorHandler(`Product by this id does not exists`, res, 404)
 
         const productData = productById.toJSON()
 
+        logger.info(productData)
         setSuccessResponse(productData, res)
     } catch (e) {
+        logger.error(e.message)
         errorHandler(e.message, res)
     }
 }
 
 const updateProduct = async (req, res) => {
     try {
+        sdc.increment('PUT /v1/product/pr_id')
         // the username and password from Basic Auth
         const requsername = req.credentials.name
         const reqpassword = req.credentials.pass
@@ -116,14 +126,17 @@ const updateProduct = async (req, res) => {
         
         // call the modifyUser service
         const updateProduct = await updateProductById(id, newProduct)
+
         setSuccessResponse('', res, 204)
     } catch (e) {
+        logger.error(e.message)
         errorHandler(e.message, res)
     }
 }
 
 const updateProductPatch = async (req, res) => {
     try {
+        sdc.increment('PATCH /v1/product/pr_id')
         // the username and password from Basic Auth
         const requsername = req.credentials.name
         const reqpassword = req.credentials.pass
@@ -161,6 +174,7 @@ const updateProductPatch = async (req, res) => {
         await updateProductById(id, updatedProduct)
         setSuccessResponse('', res, 204)
     } catch (e) {
+        logger.error(e.message)
         errorHandler(e.message, res)
     }
 }
@@ -168,6 +182,7 @@ const updateProductPatch = async (req, res) => {
 
 const deleteProduct = async (req, res) => {
     try {
+        sdc.increment('DELETE /v1/product/pr_id')
         // the username and password from Basic Auth
         const requsername = req.credentials.name
         const reqpassword = req.credentials.pass
@@ -194,12 +209,14 @@ const deleteProduct = async (req, res) => {
 
         if(deleteProductById) setSuccessResponse('', res, 204) 
     } catch (e) {
+        logger.error(e.message)
         errorHandler(e.message, res)
     }
 }
 
 const getAllImagesForProduct = async (req, res) => {
     try {
+               sdc.increment('GET /v1/product/pr_id/image')
                // the username and password from Basic Auth
                const requsername = req.credentials.name
                const reqpassword = req.credentials.pass
@@ -224,10 +241,12 @@ const getAllImagesForProduct = async (req, res) => {
        
                const op = await getImagesByProductId(id)
                if (op.length === 0) return setSuccessResponse("No images available", res, 404)
-
+            
+               logger.info(op)
                setSuccessResponse(op, res, 200)
 
     } catch (error) {
+       logger.error(error.message)
        errorHandler(error.message, res, 400) 
     }
 }
@@ -235,6 +254,7 @@ const getAllImagesForProduct = async (req, res) => {
 const addImage = async (req, res) => {
     try {
         
+        sdc.increment('POST /v1/product/pr_id/image')
         // the username and password from Basic Auth
         const requsername = req.credentials.name
         const reqpassword = req.credentials.pass
@@ -278,9 +298,11 @@ const addImage = async (req, res) => {
                     }
           const productImageData = await saveProductImg(imgData)
           const productImg = productImageData.toJSON()
+          logger.info(productImg)
           setSuccessResponse(productImg, res, 201)
 
     } catch (error) {
+        logger.error(error.message)
         errorHandler(error.message, res, 400)
     }
 }
@@ -304,6 +326,8 @@ const upload = multer({
 
 const getImageByProductId = async (req, res) => {
     try {
+
+        sdc.increment('GET /v1/product/pr_id/image/img_id')
         const requsername = req.credentials.name
         const reqpassword = req.credentials.pass
         
@@ -329,14 +353,18 @@ const getImageByProductId = async (req, res) => {
         const op = await getImageById(req.params.image_id, id)
         if (!op) return setSuccessResponse("Image does not exist", res, 404)
 
+        logger.info(op)
         setSuccessResponse(op, res, 200) 
     } catch (error) {
+        logger.error(error.message)
         errorHandler(error.message, res, 400)
     }
 }
 
 const deleteImageByProductId = async (req, res) => {
     try {
+
+        sdc.increment('DELETE /v1/product/pr_id/image/img_id')
        // the username and password from Basic Auth
        const requsername = req.credentials.name
        const reqpassword = req.credentials.pass
@@ -371,6 +399,7 @@ const deleteImageByProductId = async (req, res) => {
         setSuccessResponse("", res, 204)
        
     } catch (error) {
+       logger.error(error.message)
        errorHandler(error.message, res, 400) 
     }
 }
