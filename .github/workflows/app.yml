@@ -1,7 +1,7 @@
 name: Web App
 on: 
   push:
-    branches: [main]
+    branches: [last]
 jobs:
   packer_validate:
     runs-on: ubuntu-latest
@@ -51,3 +51,6 @@ jobs:
           target: packer-ami.pkr.hcl
         env:
           PACKER_LOG: 1
+        
+      - name: Step 4 - Test
+        run: cat manifest.json | jq -r '.builds[-1].artifact_id' | cut -d':' -f2
