@@ -54,7 +54,7 @@ jobs:
         
       - name: Step 4 - Test
         id: vars
-        run: echo "ami_id=$(cat packer_manifest.json | jq -r '.builds[-1].artifact_id' | cut -d':' -f2)" >> $GITHUB_AMI_ID
+        run: echo "ami_id=$(cat packer_manifest.json | jq -r '.builds[-1].artifact_id' | cut -d':' -f2)"
         # run: cat packer_manifest.json | jq -r '.builds[-1].artifact_id' | cut -d':' -f2
 
       - name: Step 5 - Launch template version
