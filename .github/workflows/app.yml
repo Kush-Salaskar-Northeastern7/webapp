@@ -68,18 +68,21 @@ jobs:
       - name: Test 5 output
         env:
           AMI_ID: ${{ env.AMI_ID }}
-        run: |
-          echo $AMI_ID
-          echo "ami=$AMI_ID" >> "$GITHUB_OUTPUT"
-
-      - name: Step 6 - Launch template version
-        run: |
-          aws ec2 create-launch-template-version --launch-template-name asg_launch_template --launch-template-data '{"ImageId":${{needs.packer_build_ami.outputs.ami_id}}}'
-        env:
-          AMI_ID: ${{ env.AMI_ID }} 
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }} 
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }} 
           AWS_DEFAULT_REGION: 'us-east-1'
+        run: aws ec2 create-launch-template-version --launch-template-name asg_launch_template --launch-template-data '{"ImageId":$AMI_ID}'
+          # echo $AMI_ID
+          # echo "ami=$AMI_ID" >> "$GITHUB_OUTPUT"
+
+      # - name: Step 6 - Launch template version
+      #   run: |
+      #     aws ec2 create-launch-template-version --launch-template-name asg_launch_template --launch-template-data '{"ImageId":${{needs.packer_build_ami.outputs.ami_id}}}'
+      #   env:
+      #     AMI_ID: ${{ env.AMI_ID }} 
+      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }} 
+      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }} 
+      #     AWS_DEFAULT_REGION: 'us-east-1'
 
       - name: Step 7 - Launch template instance refresh
         run: |
