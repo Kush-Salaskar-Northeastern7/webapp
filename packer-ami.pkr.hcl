@@ -88,12 +88,17 @@ build {
       "./buildscript.sh"
     ]
   }
-  "post-processors": [ [ 
-    { 
-      "output": "manifest.json", 
-      "strip_path": true, 
-      "type": "manifest" 
-    } ] ]
+  post-processor "manifest" { 
+    output = "packer_manifest.json" 
+    strip_path = true 
+    custom_data = { iteration_id = packer.iterationID } 
+  }
+  // post-processors: [ [ 
+  //   { 
+  //     "output": "manifest.json", 
+  //     "strip_path": true, 
+  //     "type": "manifest" 
+  //   } ] ]
   // output "ami_id" {
   //   value = "{{ .Builds | last "amazon-ebs" | attribute "id" }}"
   // }
