@@ -80,14 +80,14 @@ jobs:
           aws ec2 create-launch-template-version --launch-template-name asg_launch_template --launch-template-data '{"ImageId":"${{env.AMI_ID}}"}'
         env:
           AMI_ID: ${{ env.AMI_ID }} 
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }} 
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }} 
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_DEMO }} 
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEMO }} 
           AWS_DEFAULT_REGION: 'us-east-1'
 
       - name: Step 7 - Launch template instance refresh
         run: |
           start-instance-refresh --auto-scaling-group-name asg_launch_template
         env: 
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }} 
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }} 
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_DEMO }} 
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEMO }} 
           AWS_DEFAULT_REGION: 'us-east-1'
