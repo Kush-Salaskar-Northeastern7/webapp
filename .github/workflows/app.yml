@@ -51,17 +51,23 @@ jobs:
           target: packer-ami.pkr.hcl
         env:
           PACKER_LOG: 1
-        
-      - name: Step 4 - Test
-        id: vars
+
+      - name: Get AMI ID
+        id: get_ami_id
         run: |
-          echo "ami_id=$(cat packer_manifest.json | jq -r '.builds[-1].artifact_id' | cut -d':' -f2)"
-          echo "::set-output name=ami_id::$ami_id"
+          ami_id=$(cat packer_manifest.json | jq -r '.builds[-1].artifact_id' | cut -d':' -f2)
+          echo "AMI_ID=$ami_id" >> $GITHUB_ENV
+ 
+      # - name: Step 4 - Test
+      #   id: vars
+      #   run: |
+      #     echo "ami_id=$(cat packer_manifest.json | jq -r '.builds[-1].artifact_id' | cut -d':' -f2)"
+      #     echo "::set-output name=ami_id::$ami_id"
         # run: cat packer_manifest.json | jq -r '.builds[-1].artifact_id' | cut -d':' -f2
 
       - name: Test 5 output
         env:
-          AMI_ID: ${{ steps.vars.outputs.ami_id }}
+          AMI_ID: ${{ env.AMI_ID }}
         run: echo $AMI_ID
 
       - name: Step 6 - Launch template version
