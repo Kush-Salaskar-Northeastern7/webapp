@@ -86,7 +86,7 @@ jobs:
 
       - name: Step 7 - Launch template instance refresh
         run: |
-          aws ec2 start-instance-refresh --auto-scaling-group-name webapp_asg
+          aws autoscaling start-instance-refresh --auto-scaling-group-name webapp_asg
         env: 
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_DEMO }} 
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEMO }} 
