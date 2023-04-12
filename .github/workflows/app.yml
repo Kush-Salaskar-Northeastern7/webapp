@@ -53,4 +53,4 @@ jobs:
           PACKER_LOG: 1
         
       - name: Step 4 - Test
-        run: cat manifest.json | jq -r '.builds[-1].artifact_id' | cut -d':' -f2
+        run: cat packer_manifest.json | jq -r '.builds[-1].artifact_id' | cut -d':' -f2
