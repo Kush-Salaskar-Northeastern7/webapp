@@ -53,4 +53,22 @@ jobs:
           PACKER_LOG: 1
         
       - name: Step 4 - Test
-        run: cat packer_manifest.json | jq -r '.builds[-1].artifact_id' | cut -d':' -f2
+        id: vars
+        run: echo "ami_id=$(cat packer_manifest.json | jq -r '.builds[-1].artifact_id' | cut -d':' -f2)" >> $GITHUB_AMI_ID
+        # run: cat packer_manifest.json | jq -r '.builds[-1].artifact_id' | cut -d':' -f2
+
+      - name: Step 5 - Launch template version
+        run: |
+          aws ec2 create-launch-template-version --launch-template-name asg_launch_template --launch-template-data '{"ImageId":${{steps.vars.outputs.ami_id}}}'
+        env: 
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }} 
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }} 
+          AWS_DEFAULT_REGION: 'us-east-1'
+
+      - name: Step 6 - Launch template instance refresh
+        run: |
+          start-instance-refresh --auto-scaling-group-name asg_launch_template
+        env: 
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }} 
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }} 
+          AWS_DEFAULT_REGION: 'us-east-1'
