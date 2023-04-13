@@ -1,7 +1,7 @@
 name: Web App
 on: 
   push:
-    branches: [last]
+    branches: [main]
 jobs:
   packer_validate:
     runs-on: ubuntu-latest
@@ -72,7 +72,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }} 
           AWS_DEFAULT_REGION: 'us-east-1'
         run: |
-          # echo $AMI_ID
+          echo $AMI_ID
           # echo "ami=$AMI_ID" >> "$GITHUB_OUTPUT"
 
       - name: Step 6 - Launch template version
