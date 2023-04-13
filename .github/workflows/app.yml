@@ -51,3 +51,43 @@ jobs:
           target: packer-ami.pkr.hcl
         env:
           PACKER_LOG: 1
+
+      - name: Get AMI ID
+        id: get_ami_id
+        run: |
+          ami_id=$(cat packer_manifest.json | jq -r '.builds[-1].artifact_id' | cut -d':' -f2)
+          echo "AMI_ID=$ami_id" >> $GITHUB_ENV
+ 
+      # - name: Step 4 - Test
+      #   id: vars
+      #   run: |
+      #     echo "ami_id=$(cat packer_manifest.json | jq -r '.builds[-1].artifact_id' | cut -d':' -f2)"
+      #     echo "::set-output name=ami_id::$ami_id"
+        # run: cat packer_manifest.json | jq -r '.builds[-1].artifact_id' | cut -d':' -f2
+
+      - name: Test 5 output
+        env:
+          AMI_ID: ${{ env.AMI_ID }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }} 
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }} 
+          AWS_DEFAULT_REGION: 'us-east-1'
+        run: |
+          echo $AMI_ID
+          # echo "ami=$AMI_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Step 6 - Launch template version
+        run: |
+          aws ec2 create-launch-template-version --launch-template-name asg_launch_template --launch-template-data '{"ImageId":"${{env.AMI_ID}}"}'
+        env:
+          AMI_ID: ${{ env.AMI_ID }} 
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_DEMO }} 
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEMO }} 
+          AWS_DEFAULT_REGION: 'us-east-1'
+
+      - name: Step 7 - Launch template instance refresh
+        run: |
+          aws autoscaling start-instance-refresh --auto-scaling-group-name webapp_asg
+        env: 
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_DEMO }} 
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEMO }} 
+          AWS_DEFAULT_REGION: 'us-east-1'
