@@ -77,7 +77,7 @@ jobs:
 
       - name: Step 6 - Launch template version
         run: |
-          aws ec2 create-launch-template-version --launch-template-name asg_launch_template --launch-template-data '{"ImageId":"${{env.AMI_ID}}"}'
+          aws ec2 create-launch-template-version --launch-template-name asg_launch_template --launch-template-data '{"ImageId":"${{env.AMI_ID}}", "InstanceType":"t2.micro"}'
         env:
           AMI_ID: ${{ env.AMI_ID }} 
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_DEMO }} 
