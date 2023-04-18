@@ -6,10 +6,10 @@ module.exports = (app) => {
     app.get('/healthz', (req, res) => {
         res.json()
     })
-    // app.get('/healthz1', (req, res) => {
-    //     res.json()
-    // })
-    app.use('/v1/user', userRouter)
+    app.get('/healthz1', (req, res) => {
+        res.json()
+    })
+    app.use('/v2/user', userRouter)
     app.use('/v1/product', productRouter)
 
     app.use((error, req, res, next) => {
